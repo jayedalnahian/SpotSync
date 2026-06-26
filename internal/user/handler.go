@@ -100,7 +100,13 @@ func (h *handler) LoginUser(c *echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, response)
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "User logged in successfully",
+		Data: response,
+	}
+	return c.JSON(http.StatusOK, result)
 
 }
 
