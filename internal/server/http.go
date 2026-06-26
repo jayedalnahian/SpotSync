@@ -3,6 +3,8 @@ package server
 import (
 	"SpotSync/internal/config"
 	"SpotSync/internal/user"
+	"fmt"
+
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -23,22 +25,22 @@ func (cv *CustomValidator) Validate(i any) error {
 	return nil
 }
 
-func Start(db *gorm.DB, cfg *config.Config) error {
+func Start(db *gorm.DB, cfg *config.Config) {
+	db.AutoMigrate(&user.User{})
+
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
 
-	e.GET("/", func(c *echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
+	e.GET("/health", func(c *echo.Context) error {
+		return c.String(http.StatusOK, "running")
 	})
 
-	user.RegisterRoutes(e, db)
+	//routes
+	user.RegisterRoutes(e, db, cfg)
 
-	port := config.LoadEnv().Port
-	if err := e.Start(":" + port); err != nil {
+	port := fmt.Sprintf(":%s", cfg.Port)
+	if err := e.Start(port); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
-
-	return nil
 }
