@@ -35,7 +35,7 @@ func Start(db *gorm.DB, cfg *config.Config) {
 		AllowOrigins:     cfg.CorsAllowedOrigins,
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch, http.MethodOptions},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
+		AllowCredentials: cfg.CorsAllowCredentials,
 	}))
 	e.Use(middleware.RequestLogger())
 
