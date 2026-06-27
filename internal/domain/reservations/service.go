@@ -7,6 +7,7 @@ import (
 type Service interface {
 	ReserveSpot(userID uint, req dto.ReserveSpotRequest) (dto.ReservationResponse, error)
 	GetMyReservations(userID uint) ([]dto.MyReservationResponse, error)
+	CancelReservation(userID uint, userRole string, reservationID uint) error
 }
 
 type service struct {
@@ -60,4 +61,8 @@ func (s *service) GetMyReservations(userID uint) ([]dto.MyReservationResponse, e
 	}
 
 	return response, nil
+}
+
+func (s *service) CancelReservation(userID uint, userRole string, reservationID uint) error {
+	return s.repo.CancelReservation(userID, userRole, reservationID)
 }

@@ -5,6 +5,7 @@ import (
 	"SpotSync/internal/httpresponse"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v5"
 )
@@ -89,6 +90,54 @@ func (h *handler) GetMyReservations(c *echo.Context) error {
 		Success: true,
 		Message: "My reservations retrieved successfully",
 		Data:    res,
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handler) CancelReservation(c *echo.Context) error {
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, httpresponse.Error{
+			Code:    http.StatusUnauthorized,
+			Message: "Unauthorized: User ID missing",
+		})
+	}
+
+	userRole, _ := c.Get("user_role").(string)
+	reservationIDStr := c.Param("id")
+	reservationID, err := strconv.ParseUint(reservationIDStr, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid reservation ID",
+		})
+	}
+
+	err = h.service.CancelReservation(userID, userRole, uint(reservationID))
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrReservationNotFound):
+			return c.JSON(http.StatusNotFound, httpresponse.Error{
+				Code:    http.StatusNotFound,
+				Message: err.Error(),
+			})
+		case errors.Is(err, ErrForbiddenReservationAccess):
+			return c.JSON(http.StatusForbidden, httpresponse.Error{
+				Code:    http.StatusForbidden,
+				Message: err.Error(),
+			})
+		default:
+			return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed to cancel reservation",
+				Details: err.Error(),
+			})
+		}
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "Reservation cancelled successfully",
 	}
 	return c.JSON(http.StatusOK, result)
 }

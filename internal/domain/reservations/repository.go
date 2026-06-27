@@ -9,10 +9,13 @@ import (
 )
 
 var ErrZoneFull = errors.New("parking zone is full")
+var ErrReservationNotFound = errors.New("reservation not found")
+var ErrForbiddenReservationAccess = errors.New("forbidden: you can only cancel your own reservation")
 
 type Repository interface {
 	ReserveSpot(userID, zoneID uint, licensePlate string) (*Reservation, error)
 	GetMyReservations(userID uint) ([]Reservation, error)
+	CancelReservation(userID uint, userRole string, reservationID uint) error
 }
 
 type repository struct {
@@ -72,4 +75,26 @@ func (r *repository) GetMyReservations(userID uint) ([]Reservation, error) {
 		return nil, err
 	}
 	return reservations, nil
+}
+
+func (r *repository) CancelReservation(userID uint, userRole string, reservationID uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var reservation Reservation
+		if err := tx.First(&reservation, reservationID).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrReservationNotFound
+			}
+			return err
+		}
+
+		if userRole != "admin" && reservation.UserID != userID {
+			return ErrForbiddenReservationAccess
+		}
+
+		if reservation.Status == "cancelled" {
+			return nil
+		}
+
+		return tx.Model(&reservation).Update("status", "cancelled").Error
+	})
 }
