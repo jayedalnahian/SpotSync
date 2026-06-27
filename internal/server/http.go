@@ -37,6 +37,10 @@ func Start(db *gorm.DB, cfg *config.Config) {
 		return c.String(http.StatusOK, "running")
 	})
 
+	e.GET("/", func(c *echo.Context) error {
+		return c.String(http.StatusOK, "Hello, SpotSync API is running!")
+	})
+
 	jwtService := auth.NewJWTService(cfg.JwtSecret)
 
 	//routes
