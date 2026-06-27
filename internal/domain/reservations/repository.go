@@ -12,6 +12,7 @@ var ErrZoneFull = errors.New("parking zone is full")
 
 type Repository interface {
 	ReserveSpot(userID, zoneID uint, licensePlate string) (*Reservation, error)
+	GetMyReservations(userID uint) ([]Reservation, error)
 }
 
 type repository struct {
@@ -64,4 +65,11 @@ func (r *repository) ReserveSpot(userID, zoneID uint, licensePlate string) (*Res
 	}
 
 	return reservation, nil
+}
+func (r *repository) GetMyReservations(userID uint) ([]Reservation, error) {
+	var reservations []Reservation
+	if err := r.db.Preload("Zone").Where("user_id = ?", userID).Find(&reservations).Error; err != nil {
+		return nil, err
+	}
+	return reservations, nil
 }

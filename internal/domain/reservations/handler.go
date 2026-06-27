@@ -66,3 +66,29 @@ func (h *handler) ReserveSpot(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, result)
 }
+
+func (h *handler) GetMyReservations(c *echo.Context) error {
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, httpresponse.Error{
+			Code:    http.StatusUnauthorized,
+			Message: "Unauthorized: User ID missing",
+		})
+	}
+
+	res, err := h.service.GetMyReservations(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to retrieve reservations",
+			Details: err.Error(),
+		})
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "My reservations retrieved successfully",
+		Data:    res,
+	}
+	return c.JSON(http.StatusOK, result)
+}

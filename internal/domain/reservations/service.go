@@ -6,6 +6,7 @@ import (
 
 type Service interface {
 	ReserveSpot(userID uint, req dto.ReserveSpotRequest) (dto.ReservationResponse, error)
+	GetMyReservations(userID uint) ([]dto.MyReservationResponse, error)
 }
 
 type service struct {
@@ -31,4 +32,32 @@ func (s *service) ReserveSpot(userID uint, req dto.ReserveSpotRequest) (dto.Rese
 		CreatedAt:    reservation.CreatedAt,
 		UpdatedAt:    reservation.UpdatedAt,
 	}, nil
+}
+
+func (s *service) GetMyReservations(userID uint) ([]dto.MyReservationResponse, error) {
+	reservations, err := s.repo.GetMyReservations(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []dto.MyReservationResponse
+	for _, res := range reservations {
+		response = append(response, dto.MyReservationResponse{
+			ID:           res.ID,
+			LicensePlate: res.LicensePlate,
+			Status:       res.Status,
+			Zone: dto.ZoneResponse{
+				ID:   res.Zone.ID,
+				Name: res.Zone.Name,
+				Type: res.Zone.Type,
+			},
+			CreatedAt: res.CreatedAt,
+		})
+	}
+
+	if response == nil {
+		response = []dto.MyReservationResponse{}
+	}
+
+	return response, nil
 }
