@@ -42,6 +42,7 @@ func Start(db *gorm.DB, cfg *config.Config) {
 	//routes
 	user.RegisterRoutes(e, db, cfg)
 	parking_zones.RegisterRoutes(e, db, jwtService)
+	reservations.RegisterRoutes(e, db, jwtService)
 
 	port := fmt.Sprintf(":%s", cfg.Port)
 	if err := e.Start(port); err != nil {
