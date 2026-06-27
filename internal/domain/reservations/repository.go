@@ -15,6 +15,7 @@ var ErrForbiddenReservationAccess = errors.New("forbidden: you can only cancel y
 type Repository interface {
 	ReserveSpot(userID, zoneID uint, licensePlate string) (*Reservation, error)
 	GetMyReservations(userID uint) ([]Reservation, error)
+	GetAllReservations() ([]Reservation, error)
 	CancelReservation(userID uint, userRole string, reservationID uint) error
 }
 
@@ -72,6 +73,14 @@ func (r *repository) ReserveSpot(userID, zoneID uint, licensePlate string) (*Res
 func (r *repository) GetMyReservations(userID uint) ([]Reservation, error) {
 	var reservations []Reservation
 	if err := r.db.Preload("Zone").Where("user_id = ?", userID).Find(&reservations).Error; err != nil {
+		return nil, err
+	}
+	return reservations, nil
+}
+
+func (r *repository) GetAllReservations() ([]Reservation, error) {
+	var reservations []Reservation
+	if err := r.db.Preload("User").Preload("Zone").Order("created_at desc").Find(&reservations).Error; err != nil {
 		return nil, err
 	}
 	return reservations, nil

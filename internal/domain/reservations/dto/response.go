@@ -27,3 +27,22 @@ type MyReservationResponse struct {
 	Zone         ZoneResponse `json:"zone"`
 	CreatedAt    time.Time    `json:"created_at"`
 }
+
+type UserSummaryResponse struct {
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+type AdminReservationResponse struct {
+	ID           uint                `json:"id"`
+	UserID       uint                `json:"user_id"`
+	ZoneID       uint                `json:"zone_id"`
+	LicensePlate string              `json:"license_plate"`
+	Status       string              `json:"status"`
+	User         UserSummaryResponse `json:"user"`
+	Zone         ZoneResponse        `json:"zone"`
+	CreatedAt    time.Time           `json:"created_at"`
+	UpdatedAt    time.Time           `json:"updated_at"`
+}

@@ -94,6 +94,32 @@ func (h *handler) GetMyReservations(c *echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+func (h *handler) GetAllReservations(c *echo.Context) error {
+	role, ok := c.Get("user_role").(string)
+	if !ok || role != "admin" {
+		return c.JSON(http.StatusForbidden, httpresponse.Error{
+			Code:    http.StatusForbidden,
+			Message: "Forbidden: Admin access required",
+		})
+	}
+
+	res, err := h.service.GetAllReservations()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to retrieve reservations",
+			Details: err.Error(),
+		})
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "Reservations retrieved successfully",
+		Data:    res,
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
 func (h *handler) CancelReservation(c *echo.Context) error {
 	userID, ok := c.Get("user_id").(uint)
 	if !ok {

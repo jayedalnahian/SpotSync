@@ -7,6 +7,7 @@ import (
 type Service interface {
 	ReserveSpot(userID uint, req dto.ReserveSpotRequest) (dto.ReservationResponse, error)
 	GetMyReservations(userID uint) ([]dto.MyReservationResponse, error)
+	GetAllReservations() ([]dto.AdminReservationResponse, error)
 	CancelReservation(userID uint, userRole string, reservationID uint) error
 }
 
@@ -58,6 +59,43 @@ func (s *service) GetMyReservations(userID uint) ([]dto.MyReservationResponse, e
 
 	if response == nil {
 		response = []dto.MyReservationResponse{}
+	}
+
+	return response, nil
+}
+
+func (s *service) GetAllReservations() ([]dto.AdminReservationResponse, error) {
+	reservations, err := s.repo.GetAllReservations()
+	if err != nil {
+		return nil, err
+	}
+
+	var response []dto.AdminReservationResponse
+	for _, res := range reservations {
+		response = append(response, dto.AdminReservationResponse{
+			ID:           res.ID,
+			UserID:       res.UserID,
+			ZoneID:       res.ParkingZoneID,
+			LicensePlate: res.LicensePlate,
+			Status:       res.Status,
+			User: dto.UserSummaryResponse{
+				ID:    res.User.ID,
+				Name:  res.User.Name,
+				Email: res.User.Email,
+				Role:  res.User.Role,
+			},
+			Zone: dto.ZoneResponse{
+				ID:   res.Zone.ID,
+				Name: res.Zone.Name,
+				Type: res.Zone.Type,
+			},
+			CreatedAt: res.CreatedAt,
+			UpdatedAt: res.UpdatedAt,
+		})
+	}
+
+	if response == nil {
+		response = []dto.AdminReservationResponse{}
 	}
 
 	return response, nil
