@@ -15,7 +15,6 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB, jwtService auth.JWTService) {
 
 	api := e.Group("/api/v1/zones")
 
-
-
+	api.GET("", handler.GetAllZones)
 	api.POST("", handler.CreateZone, middlewares.AuthMiddleware(jwtService))
 }

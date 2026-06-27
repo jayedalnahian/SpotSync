@@ -37,3 +37,25 @@ func (s *service) CreateZone(req dto.CreateZoneRequest) (*dto.CreateZoneResponse
 		UpdatedAt:     zone.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}, nil
 }
+
+func (s *service) GetAllZones() ([]dto.GetZoneResponse, error) {
+	zones, err := s.repo.GetAllZones()
+	if err != nil {
+		return nil, err
+	}
+
+	var res []dto.GetZoneResponse
+	for _, zone := range zones {
+		res = append(res, dto.GetZoneResponse{
+			ID:             zone.ID,
+			Name:           zone.Name,
+			Type:           zone.Type,
+			TotalCapacity:  zone.TotalCapacity,
+			AvailableSpots: zone.AvailableSpots,
+			PricePerHour:   zone.PricePerHour,
+			CreatedAt:      zone.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+
+	return res, nil
+}

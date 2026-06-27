@@ -4,6 +4,7 @@ import (
 	"SpotSync/internal/auth"
 	"SpotSync/internal/config"
 	"SpotSync/internal/domain/parking_zones"
+	"SpotSync/internal/domain/reservations"
 	"fmt"
 	"net/http"
 	"SpotSync/internal/domain/user"
@@ -26,7 +27,7 @@ func (cv *CustomValidator) Validate(i any) error {
 }
 
 func Start(db *gorm.DB, cfg *config.Config) {
-	db.AutoMigrate(&user.User{}, &parking_zones.ParkingZone{})
+	db.AutoMigrate(&user.User{}, &parking_zones.ParkingZone{}, &reservations.Reservation{})
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}

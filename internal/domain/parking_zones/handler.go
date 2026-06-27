@@ -61,3 +61,21 @@ func (h *handler) CreateZone(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, result)
 }
+
+func (h *handler) GetAllZones(c *echo.Context) error {
+	res, err := h.service.GetAllZones()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to retrieve parking zones",
+			Details: err.Error(),
+		})
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "Parking zones retrieved successfully",
+		Data:    res,
+	}
+	return c.JSON(http.StatusOK, result)
+}
