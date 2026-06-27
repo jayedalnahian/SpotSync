@@ -40,10 +40,10 @@ func AuthMiddleware(jwtService auth.JWTService) echo.MiddlewareFunc {
 				})
 			}
 
-			// store user info in context for handlers
 			c.Set("user_id", claims.UserID)
 			c.Set("user_email", claims.Email)
 			c.Set("user_name", claims.Name)
+			c.Set("user_role", claims.Role)
 
 			return next(c)
 		}

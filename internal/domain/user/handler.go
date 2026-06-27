@@ -1,8 +1,9 @@
 package user
 
 import (
+	"SpotSync/internal/domain/user/dto"
 	"SpotSync/internal/httpresponse"
-	"SpotSync/internal/user/dto"
+
 	"errors"
 	"net/http"
 

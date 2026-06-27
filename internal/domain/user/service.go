@@ -2,7 +2,7 @@ package user
 
 import (
 	"SpotSync/internal/auth"
-	"SpotSync/internal/user/dto"
+	"SpotSync/internal/domain/user/dto"
 	"errors"
 	"fmt"
 )
@@ -69,7 +69,7 @@ func (s *service) LoginUser(req dto.LoginRequest) (*dto.LoginUserResponse, error
 		return nil, ErrInvalidCredentials
 	}
 
-	token, err := s.jwtService.GenerateToken(user.ID, user.Email, user.Name)
+	token, err := s.jwtService.GenerateToken(user.ID, user.Email, user.Name, user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}

@@ -1,11 +1,12 @@
 package server
 
 import (
+	"SpotSync/internal/auth"
 	"SpotSync/internal/config"
-	"SpotSync/internal/user"
+	"SpotSync/internal/domain/parking_zones"
 	"fmt"
-
 	"net/http"
+	"SpotSync/internal/domain/user"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
@@ -19,14 +20,13 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i any) error {
 	if err := cv.validator.Struct(i); err != nil {
-		// Optionally, you could return the error to give each route more control over the status code
 		return echo.ErrBadRequest.Wrap(err)
 	}
 	return nil
 }
 
 func Start(db *gorm.DB, cfg *config.Config) {
-	db.AutoMigrate(&user.User{})
+	db.AutoMigrate(&user.User{}, &parking_zones.ParkingZone{})
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -36,8 +36,11 @@ func Start(db *gorm.DB, cfg *config.Config) {
 		return c.String(http.StatusOK, "running")
 	})
 
+	jwtService := auth.NewJWTService(cfg.JwtSecret)
+
 	//routes
 	user.RegisterRoutes(e, db, cfg)
+	parking_zones.RegisterRoutes(e, db, jwtService)
 
 	port := fmt.Sprintf(":%s", cfg.Port)
 	if err := e.Start(port); err != nil {
