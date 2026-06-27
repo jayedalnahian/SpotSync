@@ -12,6 +12,15 @@ SpotSync is a Go-based backend API for managing smart parking and EV charging re
 - Admin access to all reservations
 - Clean architecture with separate handler, service, repository, DTO, and model layers
 
+## 🌐 Live URLs
+
+| Service | URL |
+|---------|-----|
+
+| Backend | [https://spotsync-dcxl.onrender.com/](https://spotsync-dcxl.onrender.com/) |
+
+
+
 ## Tech Stack
 
 - Go 1.26+
@@ -57,6 +66,12 @@ Create a `.env` file in the project root with the following values:
 PORT=8080
 DSN=postgres://username:password@host:5432/database
 JWT_SECRET=your-secret-key
+```
+
+## Clone This Project
+
+```bash
+git clone https://github.com/jayedalnahian/SpotSync.git
 ```
 
 ## Running Locally
