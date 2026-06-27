@@ -59,3 +59,20 @@ func (s *service) GetAllZones() ([]dto.GetZoneResponse, error) {
 
 	return res, nil
 }
+
+func (s *service) GetZoneByID(id uint) (*dto.GetZoneResponse, error) {
+	zone, err := s.repo.GetZoneByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.GetZoneResponse{
+		ID:             zone.ID,
+		Name:           zone.Name,
+		Type:           zone.Type,
+		TotalCapacity:  zone.TotalCapacity,
+		AvailableSpots: zone.AvailableSpots,
+		PricePerHour:   zone.PricePerHour,
+		CreatedAt:      zone.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}, nil
+}

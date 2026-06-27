@@ -1,8 +1,9 @@
 package parking_zones
 
 import (
-	"SpotSync/internal/httpresponse"
 	"SpotSync/internal/domain/parking_zones/dto"
+	"SpotSync/internal/httpresponse"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
@@ -75,6 +76,39 @@ func (h *handler) GetAllZones(c *echo.Context) error {
 	result := httpresponse.SendResponse{
 		Success: true,
 		Message: "Parking zones retrieved successfully",
+		Data:    res,
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handler) GetZoneByID(c *echo.Context) error {
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid zone ID",
+		})
+	}
+
+	res, err := h.service.GetZoneByID(id)
+	if err != nil {
+		if err.Error() == "parking zone not found" {
+			return c.JSON(http.StatusNotFound, httpresponse.Error{
+				Code:    http.StatusNotFound,
+				Message: err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to retrieve parking zone",
+			Details: err.Error(),
+		})
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "Parking zone retrieved successfully",
 		Data:    res,
 	}
 	return c.JSON(http.StatusOK, result)
