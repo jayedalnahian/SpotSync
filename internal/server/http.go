@@ -5,9 +5,9 @@ import (
 	"SpotSync/internal/config"
 	"SpotSync/internal/domain/parking_zones"
 	"SpotSync/internal/domain/reservations"
+	"SpotSync/internal/domain/user"
 	"fmt"
 	"net/http"
-	"SpotSync/internal/domain/user"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
@@ -31,6 +31,12 @@ func Start(db *gorm.DB, cfg *config.Config) {
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     cfg.CorsAllowedOrigins,
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch, http.MethodOptions},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+	}))
 	e.Use(middleware.RequestLogger())
 
 	e.GET("/health", func(c *echo.Context) error {
