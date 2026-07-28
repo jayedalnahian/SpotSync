@@ -18,4 +18,6 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB, jwtService auth.JWTService) {
 	api.GET("", handler.GetAllZones)
 	api.GET("/:id", handler.GetZoneByID)
 	api.POST("", handler.CreateZone, middlewares.AuthMiddleware(jwtService))
+	api.PUT("/:id", handler.UpdateZone, middlewares.AuthMiddleware(jwtService))
+	api.DELETE("/:id", handler.DeleteZone, middlewares.AuthMiddleware(jwtService))
 }

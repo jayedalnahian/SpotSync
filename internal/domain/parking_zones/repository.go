@@ -17,6 +17,9 @@ type Repository interface {
 	CreateZone(zone *ParkingZone) error
 	GetAllZones() ([]ParkingZoneWithAvailableSpots, error)
 	GetZoneByID(id uint) (*ParkingZoneWithAvailableSpots, error)
+	GetRawZoneByID(id uint) (*ParkingZone, error)
+	UpdateZone(zone *ParkingZone) error
+	DeleteZone(id uint) error
 }
 
 type repository struct {
@@ -76,4 +79,35 @@ func (r *repository) GetZoneByID(id uint) (*ParkingZoneWithAvailableSpots, error
 	}
 
 	return &zone, nil
+}
+
+func (r *repository) GetRawZoneByID(id uint) (*ParkingZone, error) {
+	var zone ParkingZone
+	result := r.db.First(&zone, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("parking zone not found")
+		}
+		return nil, ErrorUnknown
+	}
+	return &zone, nil
+}
+
+func (r *repository) UpdateZone(zone *ParkingZone) error {
+	result := r.db.Save(zone)
+	if result.Error != nil {
+		return ErrorUnknown
+	}
+	return nil
+}
+
+func (r *repository) DeleteZone(id uint) error {
+	result := r.db.Delete(&ParkingZone{}, id)
+	if result.Error != nil {
+		return ErrorUnknown
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("parking zone not found")
+	}
+	return nil
 }

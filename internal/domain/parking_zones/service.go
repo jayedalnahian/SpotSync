@@ -76,3 +76,41 @@ func (s *service) GetZoneByID(id uint) (*dto.GetZoneResponse, error) {
 		CreatedAt:      zone.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}, nil
 }
+
+func (s *service) UpdateZone(id uint, req dto.UpdateZoneRequest) (*dto.CreateZoneResponse, error) {
+	zone, err := s.repo.GetRawZoneByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Name != "" {
+		zone.Name = req.Name
+	}
+	if req.Type != "" {
+		zone.Type = req.Type
+	}
+	if req.TotalCapacity > 0 {
+		zone.TotalCapacity = req.TotalCapacity
+	}
+	if req.PricePerHour > 0 {
+		zone.PricePerHour = req.PricePerHour
+	}
+
+	if err := s.repo.UpdateZone(zone); err != nil {
+		return nil, err
+	}
+
+	return &dto.CreateZoneResponse{
+		ID:            zone.ID,
+		Name:          zone.Name,
+		Type:          zone.Type,
+		TotalCapacity: zone.TotalCapacity,
+		PricePerHour:  zone.PricePerHour,
+		CreatedAt:     zone.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:     zone.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}, nil
+}
+
+func (s *service) DeleteZone(id uint) error {
+	return s.repo.DeleteZone(id)
+}

@@ -60,7 +60,7 @@ func (h *handler) CreateUser(c *echo.Context) error {
 		Message: "User registered successfully",
 		Data: res,
 	}
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusCreated, result)
 	
 }
 

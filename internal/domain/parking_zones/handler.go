@@ -113,3 +113,100 @@ func (h *handler) GetZoneByID(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, result)
 }
+
+func (h *handler) UpdateZone(c *echo.Context) error {
+	role, ok := c.Get("user_role").(string)
+	if !ok || role != "admin" {
+		return c.JSON(http.StatusForbidden, httpresponse.Error{
+			Code:    http.StatusForbidden,
+			Message: "Forbidden: Admin access required",
+		})
+	}
+
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid zone ID",
+		})
+	}
+
+	var req dto.UpdateZoneRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid request payload",
+			Details: err.Error(),
+		})
+	}
+
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Validation failed",
+			Details: err.Error(),
+		})
+	}
+
+	res, err := h.service.UpdateZone(id, req)
+	if err != nil {
+		if err.Error() == "parking zone not found" {
+			return c.JSON(http.StatusNotFound, httpresponse.Error{
+				Code:    http.StatusNotFound,
+				Message: err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update parking zone",
+			Details: err.Error(),
+		})
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "Parking zone updated successfully",
+		Data:    res,
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handler) DeleteZone(c *echo.Context) error {
+	role, ok := c.Get("user_role").(string)
+	if !ok || role != "admin" {
+		return c.JSON(http.StatusForbidden, httpresponse.Error{
+			Code:    http.StatusForbidden,
+			Message: "Forbidden: Admin access required",
+		})
+	}
+
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid zone ID",
+		})
+	}
+
+	if err := h.service.DeleteZone(id); err != nil {
+		if err.Error() == "parking zone not found" {
+			return c.JSON(http.StatusNotFound, httpresponse.Error{
+				Code:    http.StatusNotFound,
+				Message: err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to delete parking zone",
+			Details: err.Error(),
+		})
+	}
+
+	result := httpresponse.SendResponse{
+		Success: true,
+		Message: "Parking zone deleted successfully",
+	}
+	return c.JSON(http.StatusOK, result)
+}
